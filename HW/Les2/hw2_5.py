@@ -11,6 +11,8 @@ print("-----RATING LIST-----")
 rtg = [7, 5, 3, 3, 2]
 while True:
     num = input("Insert new rating element (type 'end' to stop)")
+    if num == 'end':
+        break
     try :
         rtg.index(int(num))
     except ValueError:
