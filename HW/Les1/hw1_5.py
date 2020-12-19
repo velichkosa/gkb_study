@@ -17,6 +17,3 @@ elif proc == waste :
     print("Фирма вышла в ноль.")
 else :
     print("Фирма в убытке.")
-
-
-
