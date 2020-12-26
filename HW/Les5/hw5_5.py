@@ -5,7 +5,7 @@ from random import randint
 from functools import reduce
 
 in_f = open('file5_5.txt', 'w+')
-in_f.write(' '.join([str(randint(1, 10)) for i in range(20)]))
+in_f.write(' '.join([str(randint(1, 10)) for i in range(10)]))
 in_f.seek(0)
 content = in_f.readline()
 in_f.close()
