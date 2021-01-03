@@ -13,117 +13,84 @@
 Подсказка: постарайтесь по возможности реализовать в проекте «Склад оргтехники» максимум возможностей, изученных на
 уроках по ООП.
 """
-import json
 
+class Equipment():
 
-class Off_Eq_Whouse:
-
-    def menu():
-        print('Выберите действие:\n'
-              '1. Добавить новыую модель\n'
-              '2. Добавить устройство на склад\n'
-              '3. Просмотреть базу данных')
-    pass
-
-
-class Equipment(Off_Eq_Whouse):
-
-    def __init__(self, c_name, model, eq_type, holder):
+    def __init__(self, c_name, model, sn):
         self.c_name = c_name  # название фирмы
         self.model = model  # модель устройства
-        self.eq_type = eq_type  # тип (справочник)
-        self.holder = holder  # местонахождение на складе (ячейка)
+        self.sn = sn
+        self.holder = None  # местонахождение
 
-    def move(self, holder):
+    def _move(self, holder):
         self.holder = holder
 
     def add(self, qnt):
         pass
 
+class Whouse:
+    def __init__(self, max_volume):
+        self.max_volume = max_volume
+        self.total = 0
+        self.storage = {'printers': set()}
+        self.add_mapper = {Printer: 'printers'}
+
+
+    def get_tech_to_whouse(self, equip: Equipment):
+        if self.total == self.max_volume:
+            raise OverflowError('Склад заполнен!')
+        self.storage[self.add_mapper[type(equip)]].add(equip)
+        print(type(equip))
+        equip._move('whouse')
+        self.total += 1
+
+    def move_holder(self, tech_type, holder):
+        print(self.storage[tech_type] )
+        tech_to_holder = self.storage[tech_type].pop()
+        tech_to_holder._move(holder)
+        self.total -= 1
+
+    def __call__(self, *args, **kwargs):
+        self.get_tech_to_whouse(*args, **kwargs)
 
 class Printer(Equipment):
-    qnt = int()
+    def __init__(self, c_name, model, sn, ptype, color):
+        super().__init__(c_name, model, sn)
+        self.ptype = ptype
+        self.color = color
 
-    def __init__(self, c_name, model, eq_type, cell, print_tech, dev_type, print_color, max_format):
-        super().__init__(c_name, model, eq_type, cell)
-        self.print_tech = print_tech
-        self.dev_type = dev_type
-        self.print_color = print_color
-        self.max_format = max_format
-        self.holder = 'whouse'
-        # self.qnt = 1
+    def add(self):
+        return f'Company: {self.c_name} Model: {self.model} s/n {self.sn} Paper type: {self.ptype} ' \
+               f'Color: {self.color} Holder: {self.holder}'
 
-
-    def view(self):
-        with open('model.txt', 'r', encoding='utf8') as db:
-            db_in = db.readlines()
-        for l in db_in:
-            print(l.split(','))
-
-    def new_model(self):  # создание новой модели
-        with open('model.txt', 'r', encoding='utf8') as db:
-            db_in = db.readlines()
-            print(len(db_in))
-        mod_id = 0
-        err = 0
-        for l in db_in:
-            if l.split(',')[2] == self.model:
-                print('Такая модель существует')
-                err = 1
-                break
-            # print(l.split(',')[0])
-            if int(l.split(',')[0]) > mod_id:
-                mod_id = int(l.split(',')[0])
-        if err != 1:
-            with open('model.txt', 'a', encoding='utf8') as db:
-                db.writelines(f'{mod_id + 1},{self.c_name},{self.model}, \n')
-                print(f'Добавлена новая модель!')
-                return True
-        else:
-            return False
-
-
-    def new_dev(self, mod_id):
-        dev_id = 0
-        with open('db.txt', 'a', encoding='utf8') as db:
-            for l in db:
-                # print(l.split(',')[0])
-                if int(l.split(',')[0]) > dev_id:
-                    dev_id = int(l.split(',')[0])
-            db.writelines(f'{dev_id + 1},{mod_id},{self.holder},{self.model}, \n')
-            print(f'Добавлена новая модель!')
-        pass
-
-
-    def cnt(self, model):  # метод подсчета количества устройств по полю model
-        with open('model.txt', 'r', encoding='utf8') as db:
-            db_str = db.readlines()
-            cnt = 0
-            for l in db_str:
-                cnt = cnt + l.split(',').count('lj 1200')
-        return cnt
+    def __call__(self, *args, **kwargs):
+        self.add()
 
     def __str__(self):
-        return f'Инвентарный номер: {self.inv_num}\n' \
-               f'Производитель: {self.c_name}\n' \
-               f'Модель: {self.model}\n' \
-               f'Технология печати: {self.print_tech}\n' \
-               f'Тип устройства: {self.dev_type}\n' \
-               f'Параметры цвета: {self.print_color}\n' \
-               f'Максимальный формат: {self.max_format}\n' \
-               f'Закреплен за: {self.holder}\n' \
-               f''
+        return f'Company: {self.c_name}\nModel: {self.model}\ns/n {self.sn}\nPaper type: {self.ptype}\n' \
+               f'Color: {self.color}\nHolder: {self.holder}'
 
+printer1 = Printer('hp', 'lj 1100', '1212223', 'A4', 'BW')
+printer2 = Printer('hp', 'lj 1100', '1212224', 'A4', 'BW')
+printer3 = Printer('hp', 'lj 1100', '1212225', 'A4', 'BW')
+printer4 = Printer('hp', 'lj 1100', '1212226', 'A4', 'BW')
+printer5 = Printer('hp', 'lj 1100', '1212223', 'A4', 'BW')
+"""Почему set() не отрабатывает? 1 и 5 одинаковые"""
 
-"""думаю как добавлять устройство с такой жи моделью чтобы плюсовалось/ жсон"""
+warehouse = Whouse(5)
+print(warehouse.total)
+warehouse.get_tech_to_whouse(printer1)
+warehouse.get_tech_to_whouse(printer2)
+warehouse.get_tech_to_whouse(printer3)
+warehouse.get_tech_to_whouse(printer4)
+warehouse.get_tech_to_whouse(printer5)
+warehouse.move_holder('printers', 'IT')
+"""как в данном примере переместить printer3, а не последний созданный?"""
 
+print(warehouse.total)
+print(printer1)
+print(printer2)
+print(printer3)
+print(printer4)
+print(printer5)
 
-class Scanner(Equipment):
-    pass
-
-# run = Off_Eq_Whouse
-# run.menu()
-prin1 = Printer('HP', 'lj 1200', 'Printer', 'A2', 'laser', 'MFU', 'color', 'A4')
-prin1.new_model()
-prin1.move('it')
-prin1.view()
